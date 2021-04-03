@@ -23,8 +23,10 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
     private static final String EMAIL_SENDER = "no-reply@prod.tianyubai.me";
 
     public Object handleRequest(SNSEvent request, Context context){
+        context.getLogger().log("Finding DynamoDB.");
         // confirm dynamoDB table exists
         dynamoDB = new DynamoDB(AmazonDynamoDBClientBuilder.defaultClient());
+        context.getLogger().log("DynamoDB is found.");
         Table table = dynamoDB.getTable("Emails_Sent");
         if(table == null) {
             context.getLogger().log("Table 'Emails_Sent' is not in dynamoDB.");
@@ -33,13 +35,17 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
             context.getLogger().log("There are currently no records in the SNS Event.");
             return null;
         }
+        context.getLogger().log("DynamoDB table is found");
 
         // get SNS message
         String msgSNS =  request.getRecords().get(0).getSNS().getMessage();
+        context.getLogger().log("SNS msg gotten from request.");
         // requestType, recipientEmail, bookId, bookName, author, link
         List<String> msgInfo = Arrays.asList(msgSNS.split("\\|"));
         StringBuilder emailMsg = new StringBuilder();
-        for (int i = 2; i < msgInfo.size() - 1; i++) { emailMsg.append(msgInfo.get(i)).append("\n"); }
+        emailMsg.append("Book Id: ").append(msgInfo.get(2)).append("\n");
+        emailMsg.append("Book Name: ").append(msgInfo.get(3)).append("\n");
+        emailMsg.append("Book Author: ").append(msgInfo.get(4)).append("\n");
         if (msgInfo.get(0).equals("POST")) {
             emailMsg.append("Full details of the book can be viewed at: ").append(msgInfo.get(5));
             emailMsg.insert(0, "You have successfully added the following book.\n");
@@ -48,6 +54,8 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
             emailMsg.insert(0, "You have successfully deleted the following book.\n");
             EMAIL_SUBJECT += "Deleted";
         }
+        context.getLogger().log("Email body is formatted.");
+
         
         // send email if no duplicate in dynamoDB
         Item item = table.getItem("id", emailMsg);
@@ -56,15 +64,22 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
             Content content = new Content().withData(emailMsg.toString());
             Body emailBody = new Body().withText(content);
             try {
+                context.getLogger().log("Building email service.");
                 AmazonSimpleEmailService emailService =
-                        AmazonSimpleEmailServiceClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
+                        AmazonSimpleEmailServiceClientBuilder.defaultClient();
+                context.getLogger().log("Building email request.");
                 SendEmailRequest emailRequest = new SendEmailRequest()
                         .withDestination(new Destination().withToAddresses(msgInfo.get(1)))
-                        .withMessage(new Message().withBody(emailBody)
+                        .withMessage(new Message()
+                                .withBody(emailBody)
                                 .withSubject(new Content().withCharset("UTF-8").withData(EMAIL_SUBJECT)))
                         .withSource(EMAIL_SENDER);
+                context.getLogger().log("Sending email.");
                 emailService.sendEmail(emailRequest);
-            } catch (Exception ex) {}
+                context.getLogger().log("Sent email.");
+            } catch (Exception ex) {
+                context.getLogger().log(ex.getLocalizedMessage());
+            }
         }
 
         return null;
