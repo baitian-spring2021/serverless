@@ -39,16 +39,16 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
         // requestType, recipientEmail, bookId, bookName, author, link
         List<String> msgInfo = Arrays.asList(msgSNS.split("\\|"));
         StringBuilder emailMsg = new StringBuilder();
+        for (int i = 2; i < msgInfo.size() - 1; i++) { emailMsg.append(msgInfo.get(i)).append("\n"); }
         if (msgInfo.get(0).equals("POST")) {
-            emailMsg.append("You have successfully added the following book.\n");
+            emailMsg.append("Full details of the book can be viewed at: ").append(msgInfo.get(5));
+            emailMsg.insert(0, "You have successfully added the following book.\n");
             EMAIL_SUBJECT += "Added";
         } else {
-            emailMsg.append("You have successfully deleted the following book.\n");
+            emailMsg.insert(0, "You have successfully deleted the following book.\n");
             EMAIL_SUBJECT += "Deleted";
         }
-        for (int i = 2; i < msgInfo.size() - 1; i++) { emailMsg.append(msgInfo.get(i)).append("\n"); }
-        emailMsg.append("Full details of the book can be viewed at: ").append(msgInfo.get(5));
-
+        
         // send email if no duplicate in dynamoDB
         Item item = table.getItem("id", emailMsg);
         if (item == null) {
