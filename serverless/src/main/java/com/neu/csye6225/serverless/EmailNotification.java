@@ -21,7 +21,7 @@ import java.util.List;
 public class EmailNotification implements RequestHandler<SNSEvent, Object> {
 
     private DynamoDB dynamoDB;
-    private static String EMAIL_SUBJECT = "Book ";
+    private static String EMAIL_SUBJECT;
     private static final String EMAIL_SENDER = "no-reply@prod.tianyubai.me";
 
     public Object handleRequest(SNSEvent request, Context context){
@@ -49,10 +49,10 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
         if (msgInfo.get(0).equals("POST")) {
             emailMsgSB.append("Full details of the book can be viewed at: ").append(msgInfo.get(5));
             emailMsgSB.insert(0, "You have successfully added the following book.\n");
-            EMAIL_SUBJECT += "Added";
+            EMAIL_SUBJECT = "Book Added";
         } else {
             emailMsgSB.insert(0, "You have successfully deleted the following book.\n");
-            EMAIL_SUBJECT += "Deleted";
+            EMAIL_SUBJECT = "Book Deleted";
         }
         
         // send email if no duplicate in dynamoDB
