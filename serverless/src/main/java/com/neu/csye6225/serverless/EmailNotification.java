@@ -53,7 +53,6 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
             emailMsgSB.insert(0, "You have successfully deleted the following book.\n");
             EMAIL_SUBJECT += "Deleted";
         }
-
         
         // send email if no duplicate in dynamoDB
         String emailMsg = emailMsgSB.toString();
@@ -63,7 +62,6 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
             Content content = new Content().withData(emailMsg);
             Body emailBody = new Body().withText(content);
             try {
-                context.getLogger().log("Building email service.");
                 AmazonSimpleEmailService emailService =
                         AmazonSimpleEmailServiceClientBuilder.defaultClient();
                 SendEmailRequest emailRequest = new SendEmailRequest()
@@ -73,10 +71,12 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
                                 .withSubject(new Content().withCharset("UTF-8").withData(EMAIL_SUBJECT)))
                         .withSource(EMAIL_SENDER);
                 emailService.sendEmail(emailRequest);
-                context.getLogger().log("Sent email.");
+                context.getLogger().log("Sent email!");
             } catch (Exception ex) {
                 context.getLogger().log(ex.getLocalizedMessage());
             }
+        } else {
+            context.getLogger().log("Not sent! Duplicate email detected.");
         }
 
         return null;
