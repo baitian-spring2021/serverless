@@ -48,10 +48,10 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
         emailMsgSB.append("Book Author: ").append(msgInfo.get(4)).append("\n");
         if (msgInfo.get(0).equals("POST")) {
             emailMsgSB.append("Full details of the book can be viewed at: ").append(msgInfo.get(5));
-            emailMsgSB.insert(0, "You have successfully added the following book.\n");
+            emailMsgSB.insert(0, "You have successfully added the following book.\n\n");
             EMAIL_SUBJECT = "Book Added";
         } else {
-            emailMsgSB.insert(0, "You have successfully deleted the following book.\n");
+            emailMsgSB.insert(0, "You have successfully deleted the following book.\n\n");
             EMAIL_SUBJECT = "Book Deleted";
         }
         
