@@ -25,6 +25,8 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
     private static final String EMAIL_SENDER = "no-reply@prod.tianyubai.me";
 
     public Object handleRequest(SNSEvent request, Context context){
+        Logger logger = context.getLogger();
+
         // confirm dynamoDB table exists
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
         dynamoDB = new DynamoDB(client);
@@ -75,8 +77,6 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
             } catch (Exception ex) {
                 context.getLogger().log(ex.getLocalizedMessage());
             }
-        } else {
-            context.getLogger().log("Not sent! Duplicate email detected.");
         }
 
         return null;
