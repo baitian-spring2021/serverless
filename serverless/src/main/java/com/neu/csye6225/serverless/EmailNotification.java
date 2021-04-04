@@ -26,11 +26,8 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
 
     public Object handleRequest(SNSEvent request, Context context){
         // confirm dynamoDB table exists
-        context.getLogger().log("Building DynamoDB client.");
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
-        context.getLogger().log("Building DynamoDB with client.");
         dynamoDB = new DynamoDB(client);
-        context.getLogger().log("DynamoDB is set with Client.");
         Table table = dynamoDB.getTable("Emails_Sent");
         if(table == null) {
             context.getLogger().log("Table 'Emails_Sent' is not in dynamoDB.");
@@ -39,46 +36,42 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
             context.getLogger().log("There are currently no records in the SNS Event.");
             return null;
         }
-        context.getLogger().log("DynamoDB table is found");
 
         // get SNS message
         String msgSNS =  request.getRecords().get(0).getSNS().getMessage();
-        context.getLogger().log("SNS msg gotten from request.");
         // requestType, recipientEmail, bookId, bookName, author, link
         List<String> msgInfo = Arrays.asList(msgSNS.split("\\|"));
-        StringBuilder emailMsg = new StringBuilder();
-        emailMsg.append("Book Id: ").append(msgInfo.get(2)).append("\n");
-        emailMsg.append("Book Name: ").append(msgInfo.get(3)).append("\n");
-        emailMsg.append("Book Author: ").append(msgInfo.get(4)).append("\n");
+        StringBuilder emailMsgSB = new StringBuilder();
+        emailMsgSB.append("Book Id: ").append(msgInfo.get(2)).append("\n");
+        emailMsgSB.append("Book Name: ").append(msgInfo.get(3)).append("\n");
+        emailMsgSB.append("Book Author: ").append(msgInfo.get(4)).append("\n");
         if (msgInfo.get(0).equals("POST")) {
-            emailMsg.append("Full details of the book can be viewed at: ").append(msgInfo.get(5));
-            emailMsg.insert(0, "You have successfully added the following book.\n");
+            emailMsgSB.append("Full details of the book can be viewed at: ").append(msgInfo.get(5));
+            emailMsgSB.insert(0, "You have successfully added the following book.\n");
             EMAIL_SUBJECT += "Added";
         } else {
-            emailMsg.insert(0, "You have successfully deleted the following book.\n");
+            emailMsgSB.insert(0, "You have successfully deleted the following book.\n");
             EMAIL_SUBJECT += "Deleted";
         }
-        context.getLogger().log("Email body is formatted.");
 
         
         // send email if no duplicate in dynamoDB
+        String emailMsg = emailMsgSB.toString();
         Item item = table.getItem("id", emailMsg);
         if (item == null) {
-            table.putItem(new PutItemSpec().withItem(new Item().withString("id", emailMsg.toString())));
-            Content content = new Content().withData(emailMsg.toString());
+            table.putItem(new PutItemSpec().withItem(new Item().withString("id", emailMsg)));
+            Content content = new Content().withData(emailMsg);
             Body emailBody = new Body().withText(content);
             try {
                 context.getLogger().log("Building email service.");
                 AmazonSimpleEmailService emailService =
                         AmazonSimpleEmailServiceClientBuilder.defaultClient();
-                context.getLogger().log("Building email request.");
                 SendEmailRequest emailRequest = new SendEmailRequest()
                         .withDestination(new Destination().withToAddresses(msgInfo.get(1)))
                         .withMessage(new Message()
                                 .withBody(emailBody)
                                 .withSubject(new Content().withCharset("UTF-8").withData(EMAIL_SUBJECT)))
                         .withSource(EMAIL_SENDER);
-                context.getLogger().log("Sending email.");
                 emailService.sendEmail(emailRequest);
                 context.getLogger().log("Sent email.");
             } catch (Exception ex) {
