@@ -25,7 +25,6 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
     private static final String EMAIL_SENDER = "no-reply@prod.tianyubai.me";
 
     public Object handleRequest(SNSEvent request, Context context){
-        Logger logger = context.getLogger();
 
         // confirm dynamoDB table exists
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
