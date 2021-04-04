@@ -1,6 +1,8 @@
 package com.neu.csye6225.serverless;
 
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
@@ -23,10 +25,12 @@ public class EmailNotification implements RequestHandler<SNSEvent, Object> {
     private static final String EMAIL_SENDER = "no-reply@prod.tianyubai.me";
 
     public Object handleRequest(SNSEvent request, Context context){
-        context.getLogger().log("Finding DynamoDB.");
         // confirm dynamoDB table exists
-        dynamoDB = new DynamoDB(AmazonDynamoDBClientBuilder.defaultClient());
-        context.getLogger().log("DynamoDB is found.");
+        context.getLogger().log("Building DynamoDB client.");
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+        context.getLogger().log("Building DynamoDB with client.");
+        dynamoDB = new DynamoDB(client);
+        context.getLogger().log("DynamoDB is set with Client.");
         Table table = dynamoDB.getTable("Emails_Sent");
         if(table == null) {
             context.getLogger().log("Table 'Emails_Sent' is not in dynamoDB.");
