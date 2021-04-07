@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A sample SAM template for deploying Lambda functions.
+
+Resources:
+# Details about the EmailNotification Lambda function
+  emailNotification:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.neu.csye6225.serverless.EmailNotification::handleRequest
+      Runtime: java11   
+      AutoPublishAlias: live
+# Grants this function permission to call lambda:InvokeFunction
+      Policies:
+        - Version: "2012-10-17"
+          Statement: 
+          - Effect: "Allow"
+            Action: 
+              - "lambda:InvokeFunction"
+            Resource: '*'
+      DeploymentPreference:
+# Specifies the deployment configuration      
+          Type: AllAtOnce

@@ -26,17 +26,11 @@ jobs:
           java-version: 11.0.4
 
       # Build
-      - name: Build Artifact
-        run: |
-          cd serverless
-          mvn clean install
-          cp ./target/serverless-0.0.1-SNAPSHOT.jar .
-
-      # Install Packages
-      - name: Install apt & zip
-        run: sudo apt-get update && sudo apt-get install wget zip unzip -y
-
-      # AWS CLI pre-installed in Ubuntu-Latest
+      # - name: Build Artifact
+      #   run: |
+      #     cd serverless
+      #     mvn clean install
+      #     cp ./target/serverless-0.0.1-SNAPSHOT.jar .
 
       # AWS Credentials
       - name: Configure AWS credentials
@@ -46,16 +40,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
 
-      # Upload Artifacts to S3
+      # # Upload Artifacts to S3
       - name: Upload Artifacts
         run: |
-          cd serverless
-          aws s3 cp serverless-0.0.1-SNAPSHOT.jar s3://${{ secrets.S3_BUCKET_NAME }}
+          sam package \
+          --template-file template.yml \
+          --output-template-file serverless.yml \
+          --s3-bucket ${{ secrets.S3_BUCKET_NAME }}
+          
       
-      # Deploy Lambda Function
+      # # Deploy Lambda Function
       - name: Deploy Lambda
         run: |
-          aws lambda update-function-code \
-          --function-name EmailNotification \
-          --s3-bucket ${{ secrets.S3_BUCKET_NAME}} \
-          --s3-key serverless-0.0.1-SNAPSHOT.jar
+          sam deploy \
+          --template-file serverless.yml \
+          --stack-name emailNotification \
+          --capabilities CAPABILITY_IAM
