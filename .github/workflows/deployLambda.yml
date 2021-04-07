@@ -51,7 +51,7 @@ jobs:
       # Upload Artifacts to S3
       - name: Upload Artifacts
         run: |
-          sam package \
+          aws cloudformation package \
           --template-file appspec.yml \
           --output-template-file serverless.yml \
           --s3-bucket ${{ secrets.S3_BUCKET_NAME }}
@@ -60,7 +60,7 @@ jobs:
       # Deploy Lambda Function
       - name: Deploy Lambda
         run: |
-          sam deploy \
+          aws cloudformation deploy \
           --template-file serverless.yml \
           --stack-name email-notification \
           --capabilities CAPABILITY_IAM
