@@ -58,6 +58,7 @@ jobs:
         run: |
           aws deploy create-deployment-config \
           --deployment-config-name LambdaConfig \
+          --traffic-routing-config "type="TimeBasedLinear",timeBasedLinear={linearPercentage=25,linearInterval=45}"
           --compute-platform Lambda
 
           output=$(aws deploy create-deployment \
