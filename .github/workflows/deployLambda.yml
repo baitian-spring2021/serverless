@@ -31,8 +31,6 @@ jobs:
       #     cd serverless
       #     mvn clean install
       #     cd ./target
-      #     ls
-      #     pwd
 
       - name: Build Artifact
         run: |
