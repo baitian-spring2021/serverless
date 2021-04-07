@@ -30,7 +30,9 @@ jobs:
         run: |
           cd serverless
           mvn clean install
-          cp ./target/serverless-0.0.1-SNAPSHOT.jar .
+          cd ./target
+          ls
+          pwd
 
       # AWS Credentials
       - name: Configure AWS credentials
