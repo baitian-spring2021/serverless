@@ -7,7 +7,7 @@ Resources:
   emailNotification:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: EmailNotification
+      FunctionName: "EmailNotification"
       Handler: com.neu.csye6225.serverless.EmailNotification::handleRequest
       Runtime: java11
       Timeout: 120
