@@ -58,9 +58,13 @@ jobs:
       # code deploy lambda
       - name: Deploy Lambda
         run: |
+          aws deploy create-deployment-config \
+          --deployment-config-name LambdaConfig \
+          --compute-platform Lambda
+
           output=$(aws deploy create-deployment \
           --application-name "EmailNotification" \
-          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --deployment-config-name LambdaConfig \
           --deployment-group-name "csye6225-emailNotification-deployment" \
           --description "deploy lambda email notification" \
           --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=YAML,key=appspec.yaml \
@@ -68,8 +72,7 @@ jobs:
           --output json)
           echo $output
           dId=$(echo $output | jq -r '.deploymentId')
-          aws deploy wait deployment-successful --deployment-id $dId
-
+          aws deploy wait deployment-successful --deployment-id $dId          
 
       # # Upload Artifacts to S3
       # - name: Upload Artifacts
