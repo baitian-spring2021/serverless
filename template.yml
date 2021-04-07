@@ -8,10 +8,11 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: "EmailNotification"
+      CodeUri: ./target/serverless-0.0.1-SNAPSHOT.jar
       Handler: com.neu.csye6225.serverless.EmailNotification::handleRequest
       Runtime: java11
       Timeout: 120
-      MemorySize: 
+      MemorySize: 256
       Role: arn:aws:iam::597026635425:role/LambdaServiceRole
       AutoPublishAlias: live
 # Grants this function permission to call lambda:InvokeFunction
