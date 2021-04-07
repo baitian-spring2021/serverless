@@ -26,19 +26,15 @@ jobs:
           java-version: 11.0.4
 
       # Build
-      - name: Build Artifact
-        run: |
-          cd serverless
-          mvn clean install
-          cp ./target/serverless-0.0.1-SNAPSHOT.jar .
+      # - name: Build Artifact
+      #   run: |
+      #     cd serverless
+      #     mvn clean install
+      #     cp ./target/serverless-0.0.1-SNAPSHOT.jar .
 
-      # Install Packages
-      - name: Install apt & zip
-        run: sudo apt-get update && sudo apt-get install wget zip unzip -y
-
-      # Install AWS SAM CLI
-      - name: Setup SAM CLI
-        uses: advancedcsg-open/action-setup-sam@v1
+      # # Install Packages
+      # - name: Install apt & zip
+      #   run: sudo apt-get update && sudo apt-get install wget zip unzip -y
 
       # AWS Credentials
       - name: Configure AWS credentials
