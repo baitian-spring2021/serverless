@@ -55,5 +55,4 @@ jobs:
           sam deploy \
           --template-file serverless.yml \
           --stack-name emailNotification \
-          --capabilities CAPABILITY_IAM \
-          --on-failure DELETE
+          --capabilities CAPABILITY_IAM
