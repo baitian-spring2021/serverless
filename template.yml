@@ -11,7 +11,8 @@ Resources:
       Handler: com.neu.csye6225.serverless.EmailNotification::handleRequest
       Runtime: java11
       Timeout: 120
-      MemorySize: 256
+      MemorySize: 
+      Role: arn:aws:iam::597026635425:role/LambdaServiceRole
       AutoPublishAlias: live
 # Grants this function permission to call lambda:InvokeFunction
       Policies:
