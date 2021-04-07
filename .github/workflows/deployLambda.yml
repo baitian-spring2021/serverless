@@ -63,7 +63,7 @@ jobs:
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name "csye6225-emailNotification-deployment" \
           --description "deploy lambda email notification" \
-          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=jar,key=serverless-0.0.1-SNAPSHOT.jar \
+          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=YAML,key=appspec.yaml \
           --region us-east-1 \
           --output json)
           echo $output
