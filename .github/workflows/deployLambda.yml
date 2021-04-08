@@ -71,8 +71,8 @@ jobs:
                 Properties:
                   Name: "EmailNotification"
                   Alias: "EmailNotificationAlias"
-                  CurrentVersion: "$currVersion"
-                  TargetVersion:"$targetVersion"
+                  CurrentVersion: $currVersion
+                  TargetVersion: $targetVersion
           EOM
           cat appspec.yml
 
@@ -89,7 +89,6 @@ jobs:
           --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=YAML,key=appspec.yml \
           --region us-east-1 \
           --output json)
-          echo $output
           echo $output
           dId=$(echo $output | jq -r '.deploymentId')
           aws deploy wait deployment-successful --deployment-id $dId
