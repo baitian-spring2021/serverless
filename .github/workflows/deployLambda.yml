@@ -30,7 +30,13 @@ jobs:
       #   run: |
       #     cd serverless
       #     mvn clean install
-      #     cp ./target/serverless-0.0.1-SNAPSHOT.jar .
+      #     cd ./target
+
+      - name: Build Artifact
+        run: |
+          cd serverless
+          mvn clean install
+          cp ./target/serverless-0.0.1-SNAPSHOT.jar .
 
       # AWS Credentials
       - name: Configure AWS credentials
@@ -39,20 +45,52 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
-
-      # # Upload Artifacts to S3
+      
+      # Upload Artifacts to S3
       - name: Upload Artifacts
         run: |
-          sam package \
-          --template-file template.yml \
-          --output-template-file serverless.yml \
-          --s3-bucket ${{ secrets.S3_BUCKET_NAME }}
-          
-      
-      # # Deploy Lambda Function
-      - name: Deploy Lambda
+          cd serverless
+          aws s3 cp serverless-0.0.1-SNAPSHOT.jar s3://${{ secrets.S3_BUCKET_NAME }}
+
+      - name: Set and Upload Appspec
         run: |
-          sam deploy \
-          --template-file serverless.yml \
-          --stack-name emailNotification \
-          --capabilities CAPABILITY_IAM
+          output_currVersion=$(aws lambda get-alias --function-name EmailNotification --name EmailNotificationAlias)
+          currVersion=$(jq '.FunctionVersion' <<< "$output_currVersion")
+
+          output_targetVersion=$(aws lambda update-function-code \
+          --function-name EmailNotification \
+          --s3-bucket ${{ secrets.S3_BUCKET_NAME}} \
+          --s3-key serverless-0.0.1-SNAPSHOT.jar \
+          --publish)
+          targetVersion=$(jq '.Version' <<< "$output_targetVersion")
+          echo $output_targetVersion
+
+          cat > "appspec.yml" <<- EOM
+          version: 0.0
+          Resources:
+            - EmailNotification:
+                Type: AWS::Lambda::Function
+                Properties:
+                  Name: "EmailNotification"
+                  Alias: "EmailNotificationAlias"
+                  CurrentVersion: $currVersion
+                  TargetVersion: $targetVersion
+          EOM
+          cat appspec.yml
+
+          aws s3 cp appspec.yml s3://${{ secrets.S3_BUCKET_NAME }}
+
+      # Deploy Lambda
+      - name: Deploy lambda
+        run: |
+          output=$(aws deploy create-deployment \
+          --application-name "EmailNotification" \
+          --deployment-config-name CodeDeployDefault.LambdaAllAtOnce \
+          --deployment-group-name "csye6225-emailNotification-deployment" \
+          --description "deploy lambda" \
+          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=YAML,key=appspec.yml \
+          --region us-east-1 \
+          --output json)
+          echo $output
+          dId=$(echo $output | jq -r '.deploymentId')
+          aws deploy wait deployment-successful --deployment-id $dId
