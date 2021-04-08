@@ -4,9 +4,6 @@ Resources:
       Type: AWS::Lambda::Function
       Properties:
         Name: "EmailNotification"
-        Alias: "EmailNotificationLambda"
-        CurrentVersion: "1"
-        TargetVersion: "2"
 
 # AWSTemplateFormatVersion : '2010-09-09'
 # Transform: AWS::Serverless-2016-10-31
