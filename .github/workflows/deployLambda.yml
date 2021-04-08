@@ -94,20 +94,3 @@ jobs:
           echo $output
           dId=$(echo $output | jq -r '.deploymentId')
           aws deploy wait deployment-successful --deployment-id $dId
-
-      # # Upload Artifacts to S3
-      # - name: Upload Artifacts
-      #   run: |
-      #     sam package \
-      #     --template-file template.yml \
-      #     --output-template-file serverless.yml \
-      #     --s3-bucket ${{ secrets.S3_BUCKET_NAME }}
-          
-      
-      # # Deploy Lambda Function
-      # - name: Deploy Lambda
-      #   run: |
-      #     sam deploy \
-      #     --template-file serverless.yml \
-      #     --stack-name emailNotification \
-      #     --capabilities CAPABILITY_IAM
