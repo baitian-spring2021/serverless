@@ -87,7 +87,7 @@ jobs:
       - name: Deploy lambda
         run: |
           output=$(aws deploy create-deployment \
-          --application-name "csye6225-emailNotification" \
+          --application-name "EmailNotification" \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
           --deployment-group-name "csye6225-emailNotification-deployment" \
           --description "deploy lambda" \
