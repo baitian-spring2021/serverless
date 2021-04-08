@@ -60,7 +60,7 @@ jobs:
           --deployment-config-name LambdaConfig \
           --minimum-healthy-hosts type=FLEET_PERCENT,value=10 \
           --traffic-routing-config "type="TimeBasedLinear",timeBasedLinear={linearPercentage=25,linearInterval=45}"
-          --compute-platform Lambda
+          --compute-platform "Lambda"
 
           output=$(aws deploy create-deployment \
           --application-name "EmailNotification" \
