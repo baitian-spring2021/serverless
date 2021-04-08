@@ -58,6 +58,7 @@ jobs:
         run: |
           aws deploy create-deployment-config \
           --deployment-config-name LambdaConfig \
+          --minimum-healthy-hosts type=FLEET_PERCENT,value=10 \
           --traffic-routing-config "type="TimeBasedLinear",timeBasedLinear={linearPercentage=25,linearInterval=45}"
           --compute-platform Lambda
 
