@@ -68,7 +68,7 @@ jobs:
           --s3-key serverless-0.0.1-SNAPSHOT.jar)
           targetVersion=$(jq '.Version' <<< "$output_targetVersion")
 
-          cat > "appspec.yaml" <<- EOM
+          cat > "appspec.yml" <<- EOM
           version: 0.0
           Resources:
             - EmailNotification:
@@ -79,13 +79,9 @@ jobs:
                   CurrentVersion: "$currVersion"
                   TargetVersion:"$targetVersion"
           EOM
-          cat appspec.yaml
+          cat appspec.yml
 
-          aws s3 cp appspec.yaml s3://${{ secrets.S3_BUCKET_NAME }}
-      
-      - name: Read appspec file
-        id: getappspec
-        run: echo "::set-output name=appspec::$(cat appspec.yaml)"
+          aws s3 cp appspec.yml s3://${{ secrets.S3_BUCKET_NAME }}
 
       # Deploy Lambda
       - name: Deploy lambda
@@ -95,7 +91,7 @@ jobs:
           --deployment-config-name CodeDeployDefault.LambdaAllAtOnce \
           --deployment-group-name "csye6225-emailNotification-deployment" \
           --description "deploy lambda" \
-          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=YAML,key=appspec.yaml \
+          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=YAML,key=appspec.yml \
           --region us-east-1 \
           --output json)
           echo $output
