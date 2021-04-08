@@ -60,8 +60,10 @@ jobs:
           output_targetVersion=$(aws lambda update-function-code \
           --function-name EmailNotification \
           --s3-bucket ${{ secrets.S3_BUCKET_NAME}} \
-          --s3-key serverless-0.0.1-SNAPSHOT.jar)
+          --s3-key serverless-0.0.1-SNAPSHOT.jar \
+          --publish true)
           targetVersion=$(jq '.Version' <<< "$output_targetVersion")
+          echo $output_targetVersion
 
           cat > "appspec.yml" <<- EOM
           version: 0.0
