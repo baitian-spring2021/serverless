@@ -54,13 +54,15 @@ jobs:
           cd ..
           aws s3 cp appspec.yaml s3://${{ secrets.S3_BUCKET_NAME }}
 
+      # aws deploy create-deployment-config \
+      #     --deployment-config-name LambdaConfig \
+      #     --compute-platform "Lambda" \
+      #     --traffic-routing-config "type="TimeBasedLinear",timeBasedLinear={linearPercentage=25,linearInterval=45}"
+
       # code deploy lambda
       - name: Deploy Lambda
         run: |
-          aws deploy create-deployment-config \
-          --deployment-config-name LambdaConfig \
-          --compute-platform "Lambda" \
-          --traffic-routing-config "type="TimeBasedLinear",timeBasedLinear={linearPercentage=25,linearInterval=45}"
+          
 
           output=$(aws deploy create-deployment \
           --application-name "EmailNotification" \
