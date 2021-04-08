@@ -82,23 +82,26 @@ jobs:
           cat appspec.yaml
 
           aws s3 cp appspec.yaml s3://${{ secrets.S3_BUCKET_NAME }}
+      
+      - name: Read appspec file
+        id: getappspec
+        run: echo "::set-output name=appspec::$(cat appspec.yaml)"
 
       # Deploy Lambda
       - name: Deploy lambda
         run: |
           output=$(aws deploy create-deployment \
           --application-name "EmailNotification" \
-          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --deployment-config-name CodeDeployDefault.LambdaAllAtOnce \
           --deployment-group-name "csye6225-emailNotification-deployment" \
           --description "deploy lambda" \
-          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=YAML,key=appspec.yaml \
+          --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": ${{ steps.getappspec.outputs.appspec }}}}' \
+          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=jar,key=serverless-0.0.1-SNAPSHOT.jar \
           --region us-east-1 \
           --output json)
           echo $output
           dId=$(echo $output | jq -r '.deploymentId')
           aws deploy wait deployment-successful --deployment-id $dId
-
-          
 
       # # Upload Artifacts to S3
       # - name: Upload Artifacts
