@@ -76,8 +76,8 @@ jobs:
                 Properties:
                   Name: "EmailNotification"
                   Alias: "EmailNotificationAlias"
-                  CurrentVersion: "$currVersion"
-                  TargetVersion:"$targetVersion"
+                  CurrentVersion: $currVersion
+                  TargetVersion: $targetVersion
           EOM
           cat appspec.yml
 
